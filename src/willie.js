@@ -1,10 +1,21 @@
+// native modules
 const fs = require("fs-extra");
 const path = require("path");
+const glob = require("glob");
+
+// npm modules
 const handlebars = require("handlebars");
 const fm = require("front-matter");
 
-// for local dev changes
-const chokidar = require("chokidar");
+// register helpers
+glob.sync("src/lib/helpers/**/*.js").forEach(file => {
+  const helperName = file
+    .split("/")
+    .slice(-1)[0]
+    .replace(".js", "");
+
+  handlebars.registerHelper(helperName, require(path.resolve(file)));
+});
 
 // site config
 const config = require("./config.json");
@@ -28,7 +39,6 @@ const buildSite = () => {
   console.log("=========================");
   console.log("======House Cleaning=====");
   console.log("=========================\n");
-
 
   console.log("=========================");
   console.log("======Building Site======");
@@ -57,11 +67,14 @@ const buildSite = () => {
 
       const data = {
         site: config,
-        page: attributes,
+        page: attributes
       };
 
       // support pages ability to access object properties as well
-      data.content = handlebars.compile(body)({ site: data.site, page: data.page })
+      data.content = handlebars.compile(body)({
+        site: data.site,
+        page: data.page
+      });
 
       // no need for extra directory for index.html
       if (writePath !== "index") {
@@ -71,14 +84,14 @@ const buildSite = () => {
             // write index.html to static directory
             fs.writeFileSync(
               `dist/${writePath}/index.html`,
-              layoutTemp({...data}),
+              layoutTemp({ ...data }),
               "utf8"
             );
           })
           .catch(err => console.error(err));
       } else {
         // write index.html to static root
-        fs.writeFileSync("dist/index.html", layoutTemp({...data}), "utf8");
+        fs.writeFileSync("dist/index.html", layoutTemp({ ...data }), "utf8");
       }
     });
   });
@@ -90,6 +103,8 @@ const buildSite = () => {
 
 // use chokidar to rebuild site when in development env
 if (process.env.NODE_ENV === "development") {
+  const chokidar = require("chokidar");
+
   chokidar
     .watch("./src/**/*.*")
     .on("add", path => console.log(`${path} has been added`))
