@@ -23,22 +23,25 @@ const templateFiles = walkSync("src/templates");
 // clean dist/ first
 fs.emptyDir("dist").then(() => {
   pageFiles.forEach(pFile => {
-    const { attributes, body } = fm(fs.readFileSync(pFile, "utf8"));
+    const filePath = Array.isArray(pFile) ? pFile[0] : pFile;
+    const { attributes, body } = fm(fs.readFileSync(filePath, "utf8"));
+
+    let layoutPath = "src/templates/layouts";
 
     // layout is required per page
     if (!attributes.hasOwnProperty("layout")) {
-      return console.error(`File: ${pFile} must include a layout property`);
+      layoutPath = filePath;
+    } else {
+      layoutPath += `/${attributes.layout}.html`;
     }
 
     // get the layout file ready
-    const layoutTemp = handlebars.compile(
-      fs.readFileSync(`src/templates/layouts/${attributes.layout}.html`, "utf8")
-    );
+    const layoutTemp = handlebars.compile(fs.readFileSync(layoutPath, "utf8"));
 
     // if permalink specified, use it
     const writePath = attributes.hasOwnProperty("permalink")
       ? attributes.permalink
-      : pFile.replace("src/pages/", "").replace(".html", "");
+      : filePath.replace("src/pages/", "").replace(".html", "");
 
     // no need for extra directory for index.html
     if (writePath !== "index") {
