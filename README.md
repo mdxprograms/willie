@@ -30,7 +30,7 @@ A list example from frontmatter data:
 ```handlebars
 <ul>
   {{#page.people}}
-    <li>{{ this.name }}</li>
+    <li>{{ name }}</li>
   {{/page.people}}
 </ul>
 ```
