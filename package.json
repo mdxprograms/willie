@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=development npm run dev-server & npm run build-server",
-    "dev-server": "node src/willie.js",
-    "build-server": "live-server dist"
+    "start": "NODE_ENV=development npm run build & npm run server",
+    "build": "node src/willie.js",
+    "build:prod": "NODE_ENV=production npm run build",
+    "server": "live-server dist"
   },
   "keywords": [],
   "author": "",
