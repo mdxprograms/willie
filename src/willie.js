@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require('path');
 const Handlebars = require("handlebars");
 
 /**
@@ -11,6 +12,18 @@ const Handlebars = require("handlebars");
 // read config yaml
 
 // run through pages with templates
+const walkSync = (dir, filelist = []) =>
+  fs
+    .readdirSync(dir)
+    .map(file =>
+      fs.statSync(path.join(dir, file)).isDirectory()
+        ? walkSync(path.join(dir, file), filelist)
+        : filelist.concat(path.join(dir, file))[0]
+    );
+
+const templateFiles = walkSync("src/templates");
+const pageFiles = walkSync("src/pages");
+
 const template = Handlebars.compile(
   fs.readFileSync("src/templates/layout.html", "utf8")
 );
