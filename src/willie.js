@@ -3,6 +3,9 @@ const path = require("path");
 const handlebars = require("handlebars");
 const fm = require("front-matter");
 
+// for local dev changes
+const chokidar = require("chokidar");
+
 // site config
 const config = require("./config.json");
 
@@ -16,53 +19,82 @@ const walkSync = (dir, filelist = []) =>
         : filelist.concat(path.join(dir, file))[0]
     );
 
-// get list of files
-const pageFiles = walkSync("src/pages");
-const templateFiles = walkSync("src/templates");
+const buildSite = () => {
+  // get list of files
+  const pageFiles = walkSync("src/pages");
+  const templateFiles = walkSync("src/templates");
 
-// clean dist/ first
-fs.emptyDir("dist").then(() => {
-  pageFiles.forEach(pFile => {
-    const filePath = Array.isArray(pFile) ? pFile[0] : pFile;
-    const { attributes, body } = fm(fs.readFileSync(filePath, "utf8"));
+  // clean dist/ first
+  console.log("=========================");
+  console.log("======House Cleaning=====");
+  console.log("=========================\n");
 
-    let layoutPath = "src/templates/layouts";
 
-    // layout is required per page
-    if (!attributes.hasOwnProperty("layout")) {
-      layoutPath = filePath;
-    } else {
-      layoutPath += `/${attributes.layout}.html`;
-    }
+  console.log("=========================");
+  console.log("======Building Site======");
+  console.log("=========================\n");
+  fs.emptyDir("dist").then(() => {
+    pageFiles.forEach(pFile => {
+      const filePath = Array.isArray(pFile) ? pFile[0] : pFile;
+      const { attributes, body } = fm(fs.readFileSync(filePath, "utf8"));
 
-    // get the layout file ready
-    const layoutTemp = handlebars.compile(fs.readFileSync(layoutPath, "utf8"));
+      let layoutPath = "src/templates/layouts";
 
-    // if permalink specified, use it
-    const writePath = attributes.hasOwnProperty("permalink")
-      ? attributes.permalink
-      : filePath.replace("src/pages/", "").replace(".html", "");
+      // use filepath if layout unavailable
+      if (!attributes.hasOwnProperty("layout")) {
+        layoutPath = filePath;
+      } else {
+        layoutPath += `/${attributes.layout}.html`;
+      }
 
-    // no need for extra directory for index.html
-    if (writePath !== "index") {
-      // create static directory
-      fs.ensureDir(`dist/${writePath}`)
-        .then(() => {
-          // write index.html to static directory
-          fs.writeFileSync(
-            `dist/${writePath}/index.html`,
-            layoutTemp({ site: config, page: attributes, content: body }),
-            "utf8"
-          );
-        })
-        .catch(err => console.error(err));
-    } else {
-      // write index.html to static root
-      fs.writeFileSync(
-        `dist/index.html`,
-        layoutTemp({ site: config, page: attributes, content: body }),
-        "utf8"
+      // get the layout file ready
+      const layoutTemp = handlebars.compile(
+        fs.readFileSync(layoutPath, "utf8")
       );
-    }
+
+      // if permalink specified, use it
+      const writePath = filePath.replace("src/pages/", "").replace(".html", "");
+
+      const data = {
+        site: config,
+        page: attributes,
+      };
+
+      // support pages ability to access object properties as well
+      data.content = handlebars.compile(body)({ site: data.site, page: data.page })
+
+      // no need for extra directory for index.html
+      if (writePath !== "index") {
+        // create static directory
+        fs.ensureDir(`dist/${writePath}`)
+          .then(() => {
+            // write index.html to static directory
+            fs.writeFileSync(
+              `dist/${writePath}/index.html`,
+              layoutTemp({...data}),
+              "utf8"
+            );
+          })
+          .catch(err => console.error(err));
+      } else {
+        // write index.html to static root
+        fs.writeFileSync("dist/index.html", layoutTemp({...data}), "utf8");
+      }
+    });
   });
-});
+
+  console.log("=========================");
+  console.log("======Build Finished=====");
+  console.log("=========================\n");
+};
+
+// use chokidar to rebuild site when in development env
+if (process.env.NODE_ENV === "development") {
+  chokidar
+    .watch("./src/**/*.*")
+    .on("add", path => console.log(`${path} has been added`))
+    .on("change", buildSite)
+    .on("unlink", path => console.log(`${path} has been removed`));
+} else {
+  buildSite();
+}

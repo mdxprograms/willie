@@ -14,7 +14,22 @@ A simple static site generator written in node
 ---
 title: Home
 layout: default
+people:
+- james bond:
+  name: bond
+- bobba fett:
+  name: fett
 ---
+```
+
+A list example from frontmatter data:
+
+```handlebars
+<ul>
+  {{#page.people}}
+    <li>{{ this.name }}</li>
+  {{/page.people}}
+</ul>
 ```
 
 The page would then use the `src/templates/layouts/default.html` as a layout file.

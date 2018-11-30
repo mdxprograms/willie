@@ -4,16 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "live-server dist/",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "NODE_ENV=development npm run dev-server & npm run build-server",
+    "dev-server": "node src/willie.js",
+    "build-server": "live-server dist"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "chokidar": "^2.0.4",
     "front-matter": "^3.0.1",
     "fs-extra": "^7.0.1",
     "handlebars": "^4.0.12",
-    "live-server": "^1.2.1"
-  }
+    "live-server": "^1.2.1",
+    "nodemon": "^1.18.7"
+  },
+  "devDependencies": {}
 }

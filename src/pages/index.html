@@ -1,6 +1,17 @@
 ---
 title: Home
 layout: default
+people:
+- james bond:
+  name: bond
+- bobba fett:
+  name: fett
 ---
 
-<div>page home here</div>
+A list example from frontmatter data:
+
+<ul>
+  {{#page.people}}
+    <li>{{ this.name }}</li>
+  {{/page.people}}
+</ul>
