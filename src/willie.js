@@ -30,6 +30,7 @@ fs.emptyDir("dist").then(() => {
       return console.error(`File: ${pFile} must include a layout property`);
     }
 
+    // get the layout file ready
     const layoutTemp = handlebars.compile(
       fs.readFileSync(`src/templates/layouts/${attributes.layout}.html`, "utf8")
     );
@@ -41,8 +42,10 @@ fs.emptyDir("dist").then(() => {
 
     // no need for extra directory for index.html
     if (writePath !== "index") {
+      // create static directory
       fs.ensureDir(`dist/${writePath}`)
         .then(() => {
+          // write index.html to static directory
           fs.writeFileSync(
             `dist/${writePath}/index.html`,
             layoutTemp({ site: config, page: attributes, content: body }),
@@ -51,6 +54,7 @@ fs.emptyDir("dist").then(() => {
         })
         .catch(err => console.error(err));
     } else {
+      // write index.html to static root
       fs.writeFileSync(
         `dist/index.html`,
         layoutTemp({ site: config, page: attributes, content: body }),
