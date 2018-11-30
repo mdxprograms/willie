@@ -11,6 +11,11 @@ A simple static site generator written in node with handlebars templating baked-
 - Page variables exist within the page's frontmatter, eg:
 
 
+[Frontmatter](#frontmatter)
+[Routing](#routing)
+[Helpers](#helpers)
+
+
 ## Frontmatter
 
 ```yaml
