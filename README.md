@@ -22,10 +22,8 @@ A simple static site generator written in node with handlebars templating baked-
 title: Home
 layout: default
 people:
-- james bond:
-  name: bond
-- bobba fett:
-  name: fett
+- name: bond
+- name: fett
 ---
 ```
 
@@ -46,13 +44,13 @@ The page would then use the `src/templates/layouts/default.html` as a layout fil
 
 Routing is handled based on file paths (recursively), eg:
 
-```bash
+```
 src/pages/resources/magazines.html
 ```
 
 routes to
 
-```bash
+```
 <your_site_url>/resources/magazines/
 ```
 

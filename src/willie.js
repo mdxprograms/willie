@@ -20,89 +20,99 @@ const walkSync = (dir, filelist = []) =>
         : filelist.concat(path.join(dir, file))[0]
     );
 
-const buildSite = () => {
-  // get list of files
-  const pageFiles = walkSync("src/pages");
-  const templateFiles = walkSync("src/templates");
-
-  // register helpers
-  glob.sync("src/lib/helpers/**/*.js").forEach(file => {
-    const helperName = file
-      .split("/")
-      .slice(-1)[0]
-      .replace(".js", "");
-
-    handlebars.registerHelper(helperName, require(path.resolve(file)));
-  });
-
-  // register partials
-  glob.sync("src/templates/partials/**/*.html").forEach(file => {
-    const partialName = file
-      .split("/")
-      .slice(-1)[0]
-      .replace(".html", "");
-
-    handlebars.registerPartial(
-      partialName,
-      fs.readFileSync(path.resolve(file), "utf8")
-    );
-  });
-
+const buildSite = (reload = null) => {
   // clean dist/ and build
   console.log("=========================");
   console.log("===== Building Site =====");
   console.log("=========================\n");
 
-  fs.emptyDir("dist").then(() => {
-    pageFiles.forEach(pFile => {
-      const filePath = Array.isArray(pFile) ? pFile[0] : pFile;
-      const { attributes, body } = fm(fs.readFileSync(filePath, "utf8"));
+  fs.emptyDir("dist")
+    .then(() => {
+      // get list of files
+      const pageFiles = walkSync("src/pages");
+      const templateFiles = walkSync("src/templates");
+      const helperFiles = walkSync("src/lib/helpers");
+      const partialFiles = walkSync("src/templates/partials");
 
-      let layoutPath = "src/templates/layouts";
+      // register helpers
+      helperFiles.forEach(file => {
+        const helperName = file
+          .split("/")
+          .slice(-1)[0]
+          .replace(".js", "");
 
-      // use filepath if layout unavailable
-      if (!attributes.hasOwnProperty("layout")) {
-        layoutPath = filePath;
-      } else {
-        layoutPath += `/${attributes.layout}.html`;
-      }
+        handlebars.registerHelper(helperName, require(path.resolve(file)));
+      });
 
-      // get the layout file ready
-      const layoutTemp = handlebars.compile(
-        fs.readFileSync(layoutPath, "utf8")
-      );
+      // register partials
+      partialFiles.forEach(file => {
+        const partialName = file
+          .split("/")
+          .slice(-1)[0]
+          .replace(".html", "");
 
-      // clean write path
-      const writePath = filePath.replace("src/pages/", "").replace(".html", "");
+        handlebars.registerPartial(
+          partialName,
+          fs.readFileSync(path.resolve(file), "utf8")
+        );
+      });
 
-      // re-use as needed
-      const data = {
-        site: config,
-        page: attributes
-      };
+      pageFiles.forEach(pFile => {
+        const filePath = Array.isArray(pFile) ? pFile[0] : pFile;
+        const { attributes, body } = fm(fs.readFileSync(filePath, "utf8"));
 
-      // support pages ability to access object properties as well
-      data.content = handlebars.compile(body)({...data});
+        let layoutPath = "src/templates/layouts";
 
-      // no need for extra directory for index.html or 404
-      if (writePath !== "index" && writePath !== "404") {
-        // create static directory
-        fs.ensureDir(`dist/${writePath}`)
-          .then(() => {
-            // write index.html to static directory
-            fs.writeFileSync(
-              `dist/${writePath}/index.html`,
-              layoutTemp({ ...data }),
-              "utf8"
-            );
-          })
-          .catch(err => console.error(err));
-      } else {
-        // write index.html or 404.html to static root
-        fs.writeFileSync(`dist/${writePath}.html`, layoutTemp({ ...data }), "utf8");
-      }
-    });
-  });
+        // use filepath if layout unavailable
+        if (!attributes.hasOwnProperty("layout")) {
+          layoutPath = filePath;
+        } else {
+          layoutPath += `/${attributes.layout}.html`;
+        }
+
+        // get the layout file ready
+        const layoutTemp = handlebars.compile(
+          fs.readFileSync(layoutPath, "utf8")
+        );
+
+        // clean write path
+        const writePath = filePath
+          .replace("src/pages/", "")
+          .replace(".html", "");
+
+        // re-use as needed
+        const data = {
+          site: config,
+          page: attributes
+        };
+
+        // support pages ability to access object properties as well
+        data.content = handlebars.compile(body)({ ...data });
+
+        // no need for extra directory for index.html or 404
+        if (writePath !== "index" && writePath !== "404") {
+          // create static directory
+          fs.ensureDir(`dist/${writePath}`)
+            .then(() => {
+              // write index.html to static directory
+              fs.writeFileSync(
+                `dist/${writePath}/index.html`,
+                layoutTemp({ ...data }),
+                "utf8"
+              );
+            })
+            .catch(err => console.error(err));
+        } else {
+          // write index.html or 404.html to static root
+          fs.writeFileSync(
+            `dist/${writePath}.html`,
+            layoutTemp({ ...data }),
+            "utf8"
+          );
+        }
+      });
+    })
+    .then(() => reload && reload());
 
   console.log("=========================");
   console.log("======Build Finished=====");
@@ -115,13 +125,19 @@ if (process.env.NODE_ENV === "development") {
 
   buildSite();
 
-  bs.watch("./src/**/*.*").on("change", () => {
-    buildSite();
-    bs.reload();
+  bs.watch("./src/**").on("change", () => {
+    buildSite(bs.reload);
   });
 
   bs.init({
     server: "./dist"
+  }, (err, bs) => {
+    bs.addMiddleware("*", (req, res) => {
+      res.writeHead(302, {
+        location: "/404.html"
+      });
+      res.end("Redirecting...")
+    })
   });
 } else {
   buildSite();

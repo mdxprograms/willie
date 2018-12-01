@@ -11,16 +11,13 @@ const md = require("markdown-it")({
     }
 
     return (
-      '<pre><code class="hljs">' + md.utils.escapeHtml(str) + "</code></pre>"
+      `<pre><code class="hljs">${md.utils.escapeHtml(str)}</code></pre>`
     );
-  },
-  html: true,
-  linkify: true,
-  typographer: true
+  }
 });
 
 // markdown helper - parses markdown to html
-module.exports = (filepath, hbs) => {
+module.exports = filepath => {
   const isMD =
     path.extname(filepath) === ".md" || path.extname(filepath) === "markdown";
 
