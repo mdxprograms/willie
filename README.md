@@ -1,4 +1,4 @@
-![homeboy](willie.jpg)
+![homeboy](src/assets/img/willie.jpg)
 
 > Because, pimpin' ain't easy fam - Willie Nelson
 
