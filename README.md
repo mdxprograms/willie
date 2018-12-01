@@ -1,6 +1,3 @@
-Willie
-==
-
 > Because, pimpin' ain't easy fam - Willie Nelson
 
 A simple static site generator written in node with handlebars templating baked-in.
@@ -49,9 +46,15 @@ The page would then use the `src/templates/layouts/default.html` as a layout fil
 
 Routing is handled based on file paths (recursively), eg:
 
-`src/pages/resources/magazines.html`
+```bash
+src/pages/resources/magazines.html
+```
+
 routes to
-`<your_site_url>/resources/magazines/`
+
+```bash
+<your_site_url>/resources/magazines/
+```
 
 
 ## Helpers

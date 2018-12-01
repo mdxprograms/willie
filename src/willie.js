@@ -115,7 +115,7 @@ if (process.env.NODE_ENV === "development") {
 
   buildSite();
 
-  bs.watch("./src/**/*").on("change", () => {
+  bs.watch("./src/**/*.*").on("change", () => {
     buildSite();
     bs.reload();
   });
