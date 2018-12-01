@@ -6,7 +6,12 @@
   <title>{{ site.title }}</title>
 </head>
 <body>
+  {{> navbar}}
+
   <h1>{{ page.title }}</h1>
+
   {{{ content }}}
+
+  {{> footer}}
 </body>
 </html>

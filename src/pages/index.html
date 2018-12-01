@@ -1,22 +1,17 @@
 ---
-title: Home
+title: Willie
 layout: default
 people:
-- james bond:
-  name: bond
-  age: timeless
-- bobba fett:
-  name: fett
-  age: old ass
+- name: bond
+- name: bobba fett
 ---
 
-{{embed "js/embed-me.js"}}
+{{md "README.md"}}
 
 A list example from frontmatter data:
 
 <ul>
   {{#page.people}}
-    <li>name: {{ name }}</li>
-    <li>age: {{ age }}</li>
+    <li>{{ name }}</li>
   {{/page.people}}
 </ul>

@@ -1,21 +1,11 @@
 // native modules
 const fs = require("fs-extra");
 const path = require("path");
-const glob = require("glob");
 
 // npm modules
-const handlebars = require("handlebars");
 const fm = require("front-matter");
-
-// register helpers
-glob.sync("src/lib/helpers/**/*.js").forEach(file => {
-  const helperName = file
-    .split("/")
-    .slice(-1)[0]
-    .replace(".js", "");
-
-  handlebars.registerHelper(helperName, require(path.resolve(file)));
-});
+const glob = require("glob");
+const handlebars = require("handlebars");
 
 // site config
 const config = require("./config.json");
@@ -35,14 +25,34 @@ const buildSite = () => {
   const pageFiles = walkSync("src/pages");
   const templateFiles = walkSync("src/templates");
 
-  // clean dist/ first
+  // register helpers
+  glob.sync("src/lib/helpers/**/*.js").forEach(file => {
+    const helperName = file
+      .split("/")
+      .slice(-1)[0]
+      .replace(".js", "");
+
+    handlebars.registerHelper(helperName, require(path.resolve(file)));
+  });
+
+  // register partials
+  glob.sync("src/templates/partials/**/*.html").forEach(file => {
+    const partialName = file
+      .split("/")
+      .slice(-1)[0]
+      .replace(".html", "");
+
+    handlebars.registerPartial(
+      partialName,
+      fs.readFileSync(path.resolve(file), "utf8")
+    );
+  });
+
+  // clean dist/ and build
   console.log("=========================");
-  console.log("======House Cleaning=====");
+  console.log("===== Building Site =====");
   console.log("=========================\n");
 
-  console.log("=========================");
-  console.log("======Building Site======");
-  console.log("=========================\n");
   fs.emptyDir("dist").then(() => {
     pageFiles.forEach(pFile => {
       const filePath = Array.isArray(pFile) ? pFile[0] : pFile;
@@ -62,22 +72,20 @@ const buildSite = () => {
         fs.readFileSync(layoutPath, "utf8")
       );
 
-      // if permalink specified, use it
+      // clean write path
       const writePath = filePath.replace("src/pages/", "").replace(".html", "");
 
+      // re-use as needed
       const data = {
         site: config,
         page: attributes
       };
 
       // support pages ability to access object properties as well
-      data.content = handlebars.compile(body)({
-        site: data.site,
-        page: data.page
-      });
+      data.content = handlebars.compile(body)({...data});
 
-      // no need for extra directory for index.html
-      if (writePath !== "index") {
+      // no need for extra directory for index.html or 404
+      if (writePath !== "index" && writePath !== "404") {
         // create static directory
         fs.ensureDir(`dist/${writePath}`)
           .then(() => {
@@ -90,8 +98,8 @@ const buildSite = () => {
           })
           .catch(err => console.error(err));
       } else {
-        // write index.html to static root
-        fs.writeFileSync("dist/index.html", layoutTemp({ ...data }), "utf8");
+        // write index.html or 404.html to static root
+        fs.writeFileSync(`dist/${writePath}.html`, layoutTemp({ ...data }), "utf8");
       }
     });
   });
@@ -103,13 +111,18 @@ const buildSite = () => {
 
 // use chokidar to rebuild site when in development env
 if (process.env.NODE_ENV === "development") {
-  const chokidar = require("chokidar");
+  const bs = require("browser-sync").create();
 
-  chokidar
-    .watch("./src/**/*.*")
-    .on("add", path => console.log(`${path} has been added`))
-    .on("change", buildSite)
-    .on("unlink", path => console.log(`${path} has been removed`));
+  buildSite();
+
+  bs.watch("./src/**/*").on("change", () => {
+    buildSite();
+    bs.reload();
+  });
+
+  bs.init({
+    server: "./dist"
+  });
 } else {
   buildSite();
 }
