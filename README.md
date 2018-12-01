@@ -58,11 +58,20 @@ routes to
 ## Helpers
 
 Helpers are available to add in `src/lib/helpers`
-For example there is an `embed` helper which you can use to embed a javascript or css file in your html
-It pulls from the `src/assets/` directory:
+
+#### embed
+> helper which you can use to embed a javascript or css file in your html
+  It pulls from the `src/assets/` directory:
 
 The following comes from `src/assets/js/embed-me.js`
 
 ```handlebars
 {{embed "js/embed-me.js"}}
+```
+
+#### md
+> helper to add markdown files to your html
+
+```handlebars
+{{md "README.md"}}
 ```
