@@ -1,3 +1,5 @@
+![homeboy](willie.jpg)
+
 > Because, pimpin' ain't easy fam - Willie Nelson
 
 A simple static site generator written in node with handlebars templating baked-in.
