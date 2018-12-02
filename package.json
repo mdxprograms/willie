@@ -20,5 +20,7 @@
     "live-server": "^1.2.1",
     "markdown-it": "^8.4.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "uglify-js": "^3.4.9"
+  }
 }

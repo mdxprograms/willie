@@ -10,16 +10,7 @@ const handlebars = require("handlebars");
 // site config
 const config = require("./config.json");
 
-// walkSync - recursive file finder with relative path
-const walkSync = (dir, filelist = []) =>
-  fs
-    .readdirSync(dir)
-    .map(file =>
-      fs.statSync(path.join(dir, file)).isDirectory()
-        ? walkSync(path.join(dir, file), filelist)
-        : filelist.concat(path.join(dir, file))[0]
-    );
-
+// main build process
 const buildSite = (reload = null) => {
   // clean dist/ and build
   console.log("=========================");
@@ -29,10 +20,9 @@ const buildSite = (reload = null) => {
   fs.emptyDir("dist")
     .then(() => {
       // get list of files
-      const pageFiles = walkSync("src/pages");
-      const templateFiles = walkSync("src/templates");
-      const helperFiles = walkSync("src/lib/helpers");
-      const partialFiles = walkSync("src/templates/partials");
+      const pageFiles = glob.sync("src/pages/**/*.html");
+      const helperFiles = glob.sync("src/lib/helpers/**/*.js");
+      const partialFiles = glob.sync("src/templates/partials/**/*.html");
 
       // register helpers
       helperFiles.forEach(file => {
