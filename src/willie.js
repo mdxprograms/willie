@@ -57,6 +57,9 @@ const buildSite = (reload = null) => {
         );
       });
 
+      // copy assets to dist
+      fs.copy("src/assets", "dist/assets");
+
       pageFiles.forEach(pFile => {
         const filePath = Array.isArray(pFile) ? pFile[0] : pFile;
         const { attributes, body } = fm(fs.readFileSync(filePath, "utf8"));
