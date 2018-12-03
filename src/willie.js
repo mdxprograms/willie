@@ -6,6 +6,9 @@ const path = require("path");
 const fm = require("front-matter");
 const glob = require("glob");
 const handlebars = require("handlebars");
+const babel = require("@babel/core");
+const UglifyJS = require('uglify-js');
+
 
 // site config
 const config = require("./config.json");
@@ -23,6 +26,10 @@ const buildSite = (reload = null) => {
       const pageFiles = glob.sync("src/pages/**/*.html");
       const helperFiles = glob.sync("src/lib/helpers/**/*.js");
       const partialFiles = glob.sync("src/templates/partials/**/*.html");
+      const assetFiles = {
+        scripts: glob.sync("src/assets/js/**/*.js"),
+        styles: glob.sync("src/assets/css/**/*.css")
+      };
 
       // register helpers
       helperFiles.forEach(file => {
@@ -47,8 +54,23 @@ const buildSite = (reload = null) => {
         );
       });
 
+      // uglify scripts and write to associated dist path
+      fs.ensureDir("dist/assets/js").then(() =>
+        assetFiles.scripts.forEach(scriptPath => {
+          babel
+            .transformFileAsync(scriptPath, { presets: ["@babel/preset-env"] })
+            .then(result =>
+              fs.writeFileSync(
+                scriptPath.replace("src", "dist"),
+                UglifyJS.minify(result.code).code,
+                "utf8"
+              )
+            );
+        })
+      );
+
       // copy assets to dist
-      fs.copy("src/assets", "dist/assets");
+      fs.copy("src/assets/img", "dist/assets/img");
 
       pageFiles.forEach(pFile => {
         const filePath = Array.isArray(pFile) ? pFile[0] : pFile;
@@ -122,16 +144,19 @@ if (process.env.NODE_ENV === "development") {
     buildSite(bs.reload);
   });
 
-  bs.init({
-    server: "./dist"
-  }, (err, bs) => {
-    bs.addMiddleware("*", (req, res) => {
-      res.writeHead(302, {
-        location: "/404.html"
+  bs.init(
+    {
+      server: "./dist"
+    },
+    (err, bs) => {
+      bs.addMiddleware("*", (req, res) => {
+        res.writeHead(302, {
+          location: "/404.html"
+        });
+        res.end("Redirecting...");
       });
-      res.end("Redirecting...")
-    })
-  });
+    }
+  );
 } else {
   buildSite();
 }

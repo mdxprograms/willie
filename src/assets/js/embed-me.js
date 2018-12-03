@@ -1,1 +1,7 @@
-console.log("working embed code")
+class Test {
+  constructor() {
+    console.log("I am working")
+  }
+}
+
+new Test();
