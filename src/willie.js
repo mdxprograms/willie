@@ -16,9 +16,7 @@ const config = require("./config.json");
 // main build process
 const buildSite = (reload = null) => {
   // clean dist/ and build
-  console.log("=========================");
   console.log("===== Building Site =====");
-  console.log("=========================\n");
 
   fs.emptyDir("dist")
     .then(() => {
@@ -129,9 +127,7 @@ const buildSite = (reload = null) => {
     })
     .then(() => reload && reload());
 
-  console.log("=========================");
   console.log("======Build Finished=====");
-  console.log("=========================\n");
 };
 
 // use chokidar to rebuild site when in development env
