@@ -7,11 +7,33 @@ const fm = require("front-matter");
 const glob = require("glob");
 const handlebars = require("handlebars");
 const babel = require("@babel/core");
-const UglifyJS = require('uglify-js');
-
+const UglifyJS = require("uglify-js");
 
 // site config
 const config = require("./config.json");
+
+const registerHelpers = helperFiles =>
+  helperFiles.forEach(file => {
+    const helperName = file
+      .split("/")
+      .slice(-1)[0]
+      .replace(".js", "");
+
+    handlebars.registerHelper(helperName, require(path.resolve(file)));
+  });
+
+const registerPartials = partialFiles =>
+  partialFiles.forEach(file => {
+    const partialName = file
+      .split("/")
+      .slice(-1)[0]
+      .replace(".html", "");
+
+    handlebars.registerPartial(
+      partialName,
+      fs.readFileSync(path.resolve(file), "utf8")
+    );
+  });
 
 // main build process
 const buildSite = (reload = null) => {
@@ -30,27 +52,10 @@ const buildSite = (reload = null) => {
       };
 
       // register helpers
-      helperFiles.forEach(file => {
-        const helperName = file
-          .split("/")
-          .slice(-1)[0]
-          .replace(".js", "");
-
-        handlebars.registerHelper(helperName, require(path.resolve(file)));
-      });
+      registerHelpers(helperFiles);
 
       // register partials
-      partialFiles.forEach(file => {
-        const partialName = file
-          .split("/")
-          .slice(-1)[0]
-          .replace(".html", "");
-
-        handlebars.registerPartial(
-          partialName,
-          fs.readFileSync(path.resolve(file), "utf8")
-        );
-      });
+      registerPartials(partialFiles);
 
       // uglify scripts and write to associated dist path
       fs.ensureDir("dist/assets/js").then(() =>
