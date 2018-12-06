@@ -12,7 +12,7 @@ A simple static site generator written in node with handlebars templating baked-
 
 [Frontmatter](#frontmatter)
 
-[Data Files](#datafiles)
+[Data Files](#data-files)
 
 [Routing](#routing)
 
