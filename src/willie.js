@@ -101,6 +101,8 @@ const buildSite = (reload = null) => {
       // copy image assets
       fs.copy("src/assets/img", "dist/assets/img");
 
+      fs.copy("src/assets/css", "dist/assets/css");
+
       pageFiles.forEach(pFile => {
         const filePath = Array.isArray(pFile) ? pFile[0] : pFile;
         const { attributes, body } = fm(fs.readFileSync(filePath, "utf8"));

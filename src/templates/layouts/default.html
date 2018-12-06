@@ -1,18 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <!--Add your highlight.js css theme here for use with the markdown helper-->
-  <title>{{ site.title }}</title>
-</head>
-<body>
-  {{> navbar }}
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <!--Add your highlight.js css theme here for use with the markdown helper-->
+    <title>{{ site.title }}</title>
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+  </head>
+  <body>
+    {{> navbar }}
 
-  <h1>{{ page.title }}</h1>
+    <div class="container">
+      <div class="columns">
+        <div class="column col-xs-12">
+          {{{ content }}}
+        </div>
+      </div>
+    </div>
 
-  {{{ content }}}
-
-  {{> footer }}
-</body>
+    {{> footer }}
+  </body>
 </html>

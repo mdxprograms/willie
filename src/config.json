@@ -1,4 +1,5 @@
 {
   "title": "Willie",
-  "description": "A simple Javascript static site generator"
+  "description": "A simple Javascript static site generator",
+  "github": "https://github.com/mdxprograms/willie"
 }
