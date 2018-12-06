@@ -35,6 +35,21 @@ const registerPartials = partialFiles =>
     );
   });
 
+const compileJSAssets = assetFiles =>
+  fs.ensureDir("dist/assets/js").then(() =>
+    assetFiles.scripts.forEach(scriptPath => {
+      babel
+        .transformFileAsync(scriptPath, { presets: ["@babel/preset-env"] })
+        .then(result =>
+          fs.writeFileSync(
+            scriptPath.replace("src", "dist"),
+            UglifyJS.minify(result.code).code,
+            "utf8"
+          )
+        );
+    })
+  );
+
 // main build process
 const buildSite = (reload = null) => {
   // clean dist/ and build
@@ -57,22 +72,10 @@ const buildSite = (reload = null) => {
       // register partials
       registerPartials(partialFiles);
 
-      // uglify scripts and write to associated dist path
-      fs.ensureDir("dist/assets/js").then(() =>
-        assetFiles.scripts.forEach(scriptPath => {
-          babel
-            .transformFileAsync(scriptPath, { presets: ["@babel/preset-env"] })
-            .then(result =>
-              fs.writeFileSync(
-                scriptPath.replace("src", "dist"),
-                UglifyJS.minify(result.code).code,
-                "utf8"
-              )
-            );
-        })
-      );
+      // compile js assets
+      compileJSAssets(assetFiles);
 
-      // copy assets to dist
+      // copy image assets
       fs.copy("src/assets/img", "dist/assets/img");
 
       pageFiles.forEach(pFile => {
@@ -135,7 +138,11 @@ const buildSite = (reload = null) => {
   console.log("======Build Finished=====");
 };
 
-// use chokidar to rebuild site when in development env
+/**
+ * Run Willie!
+ * use browserSync for watch and build trigger
+ * use middleware for defaulting 404 page
+ */
 if (process.env.NODE_ENV === "development") {
   const bs = require("browser-sync").create();
 
