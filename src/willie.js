@@ -130,8 +130,6 @@ const buildSite = (reload = null) => {
           ...globalData
         };
 
-        console.log(data);
-
         // support pages ability to access object properties as well
         data.content = handlebars.compile(body)({ ...data });
 
