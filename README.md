@@ -12,6 +12,8 @@ A simple static site generator written in node with handlebars templating baked-
 
 [Frontmatter](#frontmatter)
 
+[Data Files](#datafiles)
+
 [Routing](#routing)
 
 [Helpers](#helpers)
@@ -41,6 +43,17 @@ A list example from frontmatter data:
 
 The page would then use the `src/templates/layouts/default.html` as a layout file.
 
+
+## Data Files
+
+Data files are located in `src/data` as json files.
+If a data file is at `src/data/people.json` then you can access it via
+
+```handlebars
+{{#data.people}}
+  {{ name }}
+{{/data.people}}
+```
 
 ## Routing
 
