@@ -50,6 +50,23 @@ const compileJSAssets = assetFiles =>
     })
   );
 
+const getData = dataFiles => {
+  let data = {};
+
+  dataFiles.forEach(dataFile => {
+    const name = dataFile
+      .split("\\")
+      .pop()
+      .split("/")
+      .pop()
+      .replace(".json", "");
+
+    data[name] = require(path.resolve(dataFile));
+  });
+
+  return data;
+};
+
 // main build process
 const buildSite = (reload = null) => {
   // clean dist/ and build
@@ -64,6 +81,12 @@ const buildSite = (reload = null) => {
       const assetFiles = {
         scripts: glob.sync("src/assets/js/**/*.js"),
         styles: glob.sync("src/assets/css/**/*.css")
+      };
+      const dataFiles = glob.sync("src/data/**/*.json");
+
+      const globalData = {
+        site: config,
+        data: getData(dataFiles)
       };
 
       // register helpers
@@ -103,8 +126,8 @@ const buildSite = (reload = null) => {
 
         // re-use as needed
         const data = {
-          site: config,
-          page: attributes
+          page: attributes,
+          ...globalData
         };
 
         // support pages ability to access object properties as well
