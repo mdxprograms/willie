@@ -1,4 +1,9 @@
 <footer class="footer text-center">
   <a href="/contact/">Contact Us</a>
-  <a href="https://www.twitter.com/willienelson">Tweet Us!</a>
+  {{#if site.twitter}}
+    <a href="https://www.twitter.com/{{ site.twitter }}">Tweet Us!</a>
+  {{/if}}
+  {{#if site.github}}
+    <a href="{{ site.github }}">Github</a>
+  {{/if}}
 </footer>
