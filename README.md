@@ -78,7 +78,7 @@ Helpers are available to add in `src/lib/helpers`
 > helper which you can use to embed a javascript or css file in your html
   It pulls from the `src/assets/` directory:
 
-The following comes from `src/assets/js/embed-me.js`
+Javscript file embed from `src/assets/js/embed-me.js`
 
 ```handlebars
 {{embed "js/embed-me.js"}}
